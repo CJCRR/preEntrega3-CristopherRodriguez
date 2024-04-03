@@ -1,0 +1,80 @@
+<div class="container">
+  <div>
+  <h1>Lista de todos los productos</h1>
+  </div>
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    {{#each docs}}
+    <div class="col">
+      <div class="card h-100" id={{this.id}}>
+        <img src={{this.thumbnail}} class="card-img-top" alt={{this.title}}>
+        <div class="card-body">
+          <h5 class="card-title">{{this.title}}</h5>
+          <p class="card-title">{{this._id}}</p>
+          <p class="card-text">Descripción: {{this.description}}</p>
+          <p class="card-text">Código: {{this.code}}</p>
+          <p class="card-text">categoria: {{this.category}}</p>
+          <div class="row">
+            <p class="card-text col">Stock: {{this.stock}}</p>
+            <p class="card-text col">Precio: ${{this.price}}</p>
+          </div>
+          <div>
+            <a href=/realtimeproducts/{{this._id}} class="btn btn-outline-primary col">Ver más</a>
+            <button href="" class="btn btn-outline-primary col" onclick="addToCart('{{this._id}}')">Agregar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  <div class="paginate">
+    {{#if hasPrevPage}}
+    <a href="{{ prevLink }}" class="prevNext">Anterior</a>
+    {{/if}}
+    {{#if hasNextPage}}
+    <a href="{{ nextLink }}" class="prevNext">Siguiente</a>
+    {{/if}}
+</div>
+</div>
+
+<script>
+const addToCart = async (id) => {
+    // Crear el carrito si no existe en el almacenamiento local
+    let cart = JSON.parse(localStorage.getItem('cart'));
+    if (!cart) {
+        // Si el carrito no existe, crear uno nuevo a través de una solicitud POST a la API
+        const response = await fetch(`/api/carts`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Analizar el JSON de la respuesta para obtener la información del nuevo carrito
+        const nuevoCarrito = await response.json();
+        cart = nuevoCarrito;
+
+        // Almacenar el nuevo carrito en el almacenamiento local
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Agregar el producto seleccionado al carrito mediante una solicitud POST a la API
+    const respuesta = await fetch(`/api/carts/${cart._id}/product/${id}`, {
+        method: 'POST'
+    });
+
+    // Verificar si la solicitud fue exitosa
+    if (!respuesta.ok) {
+        console.log('error');
+    }
+
+    // Mostrar una alerta indicando que el producto se ha agregado al carrito
+    alert('Agregado al carrito');
+    console.log(await respuesta.json());
+}
+
+</script>
+
+
+
+
+
