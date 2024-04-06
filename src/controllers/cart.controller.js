@@ -54,8 +54,7 @@ export const addProductCartController = async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
-    
-        // Obtén el usuario actual
+
         const userId = req.session.user._id;
         const user = await User.findById(userId);
         
@@ -91,10 +90,6 @@ export const addProductCartController = async (req, res) => {
     
         await cartModel.findByIdAndUpdate(cartId, { products: cart.products }).exec();
     
-        //user.cart.products.push({
-          //product: productId,
-          //quantity: 1
-        //});
         await user.save();
     
         res.status(201).json(cart);
