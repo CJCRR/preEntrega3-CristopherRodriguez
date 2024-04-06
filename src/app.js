@@ -7,12 +7,13 @@ import connectToDB from "./config/dbConfig.js";
 import routerProducts from './routes/products.js';
 import routerCarts from './routes/carts.js';
 import viewsRoutes from './routes/views.router.js'
+import viewsUserRouter from "./routes/viewsUser.router.js"
+import sessionsRouter from "./routes/sessions.router.js"
+import mailPurchaseRouter from './routes/mailPurchase.router.js'
 
 import socketProducts from './listeners/socketProducts.js';
 import socketChat from './listeners/socketChat.js';
 
-import viewsUserRouter from "./routes/viewsUser.router.js"
-import sessionsRouter from "./routes/sessions.router.js"
 import session from "express-session"
 import MongoStore from "connect-mongo"
 
@@ -20,13 +21,13 @@ import passport from 'passport'
 import initializePassport from './config/passport.config.js'
 import config from './config/config.js';
 
+
+
 const port = config.port
 const mongoURL = config.mongoURL
 const mongoDBName = config.mongoDBName
 
 const app = express();
-
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(`${__dirname}/public`));
@@ -36,6 +37,7 @@ app.engine("handlebars", handlebars.engine());
 app.set("view engine", "handlebars");
 app.set("views",`${__dirname}/views`);
 
+// configuracion de la sesion
 app.use(
   session({
     store: MongoStore.create({
@@ -58,11 +60,12 @@ initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api/products', routerProducts);
-app.use('/api/carts', routerCarts);
 app.use("/", viewsRoutes);
 app.use('/', viewsUserRouter);
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/products', routerProducts);
+app.use('/api/carts', routerCarts);
+app.use('/sendMailPurchase', mailPurchaseRouter);
 
 app.use((req, res) => {
   res.render("404");

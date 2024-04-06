@@ -22,11 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
           // Redireccionar al perfil del usuario en caso de inicio de sesión exitoso
           window.location.href = "/profile";
         } else {
-          // Mostrar mensaje de error en caso de credenciales inválidas
           alert(data.message);
         }
       } catch (error) {
-        console.error("Error en la solicitud:", error);
+        console.log(`Error al analizar la respuesta JSON: , ${error.message}`);
+        console.log(`Detalles del error completo: , ${error}`);
       }
     });
   });

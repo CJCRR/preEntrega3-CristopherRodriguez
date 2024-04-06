@@ -1,6 +1,7 @@
 import productModel from '../dao/models/products.model.js';
 import cartModel from "../dao/models/carts.model.js";
 import User from '../dao/models/user.model.js';
+import { ProductService } from '../services/index.js';
 
 export const readViewsProductsController = async (req, res) => {
     try {

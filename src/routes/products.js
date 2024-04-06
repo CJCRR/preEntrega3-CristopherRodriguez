@@ -6,8 +6,6 @@ import { createProductController,
   updateProductController,
   deleteProductController } from "../controllers/product.controller.js";
 
-const filePathProducts = './src/productos.json';
-
 const router = Router();
 
 // Ruta raíz GET /api/products - Listar todos los productos

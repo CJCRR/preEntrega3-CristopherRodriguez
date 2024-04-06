@@ -20,8 +20,8 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     thumbnail: {
-        type: String,
-        required: false
+        type: [String],
+        default: []
     },
     code: {
         type: String,

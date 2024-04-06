@@ -1,5 +1,7 @@
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
 import Cart from '../dao/models/carts.model.js'
+import UserDTO from '../dto/User.js'
 
 export const createUserController = async (req, res, next) => {
   passport.authenticate('register', async (err, user, info) => {
@@ -58,6 +60,35 @@ export const githubCallbackLoginUserController = async (req, res) => {
     res.redirect('/');
 }
 
+// Middleware de autenticación JWT
+export const authenticateJWT = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (token) {
+      jwt.verify(token, secretKey, (err, user) => {
+          if (err) {
+              return res.sendStatus(403);
+          }
+
+          req.user = user;
+          next();
+      });
+  } else {
+      res.sendStatus(401);
+  }
+};
+
+// Middleware de autorización para roles específicos
+export const authorize = (roles) => {
+  return (req, res, next) => {
+      if (roles.includes(req.user.role)) {
+          next();
+      } else {
+          res.sendStatus(403);
+      }
+  };
+};
+
 export const readInfoUserController = (req, res) => {
   if (req.isAuthenticated()) {
     // Si el usuario está autenticado, devuelve los detalles del usuario actual
@@ -70,8 +101,10 @@ export const readInfoUserController = (req, res) => {
       cart: req.user.cart,
       role: req.user.role
     };
-    console.log('User: ', user)
-    res.status(200).json(user);
+
+    const result = new UserDTO(user);
+    console.log('User: ', result)
+    res.status(200).json(result);
   } else {
     // Si el usuario no está autenticado, devuelve un error 401 (No autorizado)
     res.status(401).json({ error: 'No autorizado' });

@@ -7,7 +7,8 @@ import {
   updateProductsCartController,
   updateProductCartController,
   deleteProductCartController,
-  deleteProductsCartController 
+  deleteProductsCartController,
+  purchaseCartController 
 } from "../controllers/cart.controller.js";
 import { __dirname } from "../utils.js";
 
@@ -24,6 +25,9 @@ router.post('/', createCartController);
 
 // Agrega un producto al carrito
 router.post('/:cid/product/:pid', addProductCartController);
+
+// Ruta para finalizar la compra de los productos agregados al carrito
+router.get('/:cid/purchase', purchaseCartController);
 
 // PUT api/carts/:cid deberá actualizar el carrito con un arreglo de productos con el formato especificado arriba.
 router.put('/:cid', updateProductsCartController);

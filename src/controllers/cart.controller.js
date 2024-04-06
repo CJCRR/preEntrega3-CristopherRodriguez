@@ -1,8 +1,9 @@
 import cartModel from '../dao/models/carts.model.js';
 import productsModel from '../dao/models/products.model.js';
 import User from '../dao/models/user.model.js';
+import { ProductService } from '../services/index.js';
 import { __dirname } from "../utils.js";
-
+import ticketModel from '../dao/models/ticket.model.js'
 
 export const readCartsController = async (req, res) => {
     try {
@@ -25,7 +26,7 @@ export const readCartController = async (req, res) => {
         }
         
         // Obtener la información completa de los productos utilizando el populate
-        const productsWithInfo = await Product.populate(cart, {
+        const productsWithInfo = await productsModel.populate(cart, {
           path: 'products.product',
           model: 'products',
         });
@@ -57,8 +58,9 @@ export const addProductCartController = async (req, res) => {
         // Obtén el usuario actual
         const userId = req.session.user._id;
         const user = await User.findById(userId);
-    
-        const product = await productsModel.findById(productId).lean().exec();
+        
+        //const product = await productsModel.findById(productId).lean().exec();
+        const product = await ProductService.getById(productId)
     
         if (!product) {
           res.status(404).json({ error: 'Producto no encontrado' });
@@ -89,10 +91,10 @@ export const addProductCartController = async (req, res) => {
     
         await cartModel.findByIdAndUpdate(cartId, { products: cart.products }).exec();
     
-        user.cart.products.push({
-          product: productId,
-          quantity: 1
-        });
+        //user.cart.products.push({
+          //product: productId,
+          //quantity: 1
+        //});
         await user.save();
     
         res.status(201).json(cart);
@@ -202,4 +204,71 @@ export const deleteProductsCartController = async (req, res) => {
         console.log('Error al vaciar el carrito:', error);
         res.status(500).json({ error: 'Error en el servidor' });
     }
+}
+
+export const purchaseCartController = async (req, res) => {
+  try {
+    const cartId = req.params.cid;
+
+    // Obtener el carrito
+    const cart = await cartModel.findById(cartId).populate('products.product').lean().exec();
+
+    if (!cart) {
+      res.status(404).json({ error: 'Carrito no encontrado' });
+      return;
+    }
+
+    let totalAmount = 0; // Monto total de la compra
+    const purchasedProducts = []; // Productos que se han comprado
+
+    // Filtrar los productos que se pueden comprar y actualizar el monto total
+    const unprocessedProducts = cart.products.filter(item => {
+      const product = item.product;
+
+      if (product.stock >= item.quantity) {
+        product.stock -= item.quantity; // Actualizar stock del producto
+        totalAmount += product.price * item.quantity; // Actualizar monto total
+        purchasedProducts.push(item); // Agregar a los productos comprados
+        return false; // Producto comprado y procesado
+      }
+
+      return true; // Producto no procesado
+    });
+
+    if (purchasedProducts.length === 0) {
+      res.status(400).json({ error: 'No se pudo procesar ninguna compra' });
+      return;
+    }
+
+    // Actualizar los stocks de los productos comprados
+    await Promise.all(purchasedProducts.map(async item => {
+      const product = await productsModel.findById(item.product._id);
+      product.stock -= item.quantity;
+      await product.save();
+    }));
+
+    // Crear un ticket con los datos de la compra
+    const ticketData = {
+      amount: totalAmount,
+      purchaser: req.session.user.email,
+    };
+
+    const newTicket = await ticketModel.create(ticketData);
+
+    // Actualizar el carrito del usuario con los productos no procesados
+    const user = await User.findById(req.session.user._id).populate('cart').exec();
+    if (user.cart) {
+      user.cart.products = unprocessedProducts;
+      await user.cart.save();
+    }
+
+    res.status(200).json({
+      purchasedProducts,
+      unprocessedProducts,
+      ticket: newTicket
+    });
+  } catch (error) {
+    console.log('Error al finalizar la compra:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 }
