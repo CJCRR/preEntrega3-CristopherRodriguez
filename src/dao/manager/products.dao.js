@@ -2,7 +2,19 @@ import  productsModel  from "../models/products.model.js"
 
 export default class ProductDAO {
     getAll = async() => await productsModel.find().lean().exec()
-    getById = async(id) => await productsModel.findById(id).lean().exec()
+    getById = async(id) => {
+        try {
+            const product = await productsModel.findById(id).lean().exec()
+            if (product) {
+                product._id = product._id.toString()
+                return product
+              } else {
+                return null
+              }
+        }catch (error) {
+            console.log("cannot update user on mongo: " + error)
+        }
+    } 
     getAllPaginate = async(req) => {
         try {
             const limit = req.query.limit || 10

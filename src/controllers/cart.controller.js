@@ -53,13 +53,16 @@ export const createCartController = async (req, res) => {
 export const addProductCartController = async (req, res) => {
     try {
         const cartId = req.params.cid;
+        console.log("🚀 ~ addProductCartController ~ req.params:", req.params)
         const productId = req.params.pid;
-
+        
+        console.log("🚀 ~ addProductCartController ~ productId:", productId)
+    
+        // Obtén el usuario actual
         const userId = req.session.user._id;
         const user = await User.findById(userId);
         
-        //const product = await productsModel.findById(productId).lean().exec();
-        const product = await ProductService.getById(productId)
+        const product = await productsModel.findById(productId).lean().exec();
     
         if (!product) {
           res.status(404).json({ error: 'Producto no encontrado' });
