@@ -1,7 +1,6 @@
 import cartModel from '../dao/models/carts.model.js';
 import productsModel from '../dao/models/products.model.js';
 import User from '../dao/models/user.model.js';
-import { ProductService } from '../services/index.js';
 import { __dirname } from "../utils.js";
 import ticketModel from '../dao/models/ticket.model.js'
 
@@ -55,8 +54,6 @@ export const addProductCartController = async (req, res) => {
         const cartId = req.params.cid;
         console.log("🚀 ~ addProductCartController ~ req.params:", req.params)
         const productId = req.params.pid;
-        
-        console.log("🚀 ~ addProductCartController ~ productId:", productId)
     
         // Obtén el usuario actual
         const userId = req.session.user._id;
