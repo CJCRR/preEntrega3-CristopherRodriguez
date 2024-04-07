@@ -1,6 +1,7 @@
 import productModel from '../dao/models/products.model.js';
 import cartModel from "../dao/models/carts.model.js";
 import { ProductService } from '../services/index.js';
+import User from '../dao/models/user.model.js'
 
 export const readViewsProductsController = async (req, res) => {
     try {
@@ -60,18 +61,26 @@ export const readViewsProductController = async (req, res) => {
 
 export const readViewsCartController = async (req, res) => {
   try {
-    const id = req.params.cid
-    const result = await cartModel.findById(id).lean().exec();
-    if (result === null) {
-      return res.status(404).json({ status: 'error', error: 'Cart not found' });
+    if (req.session.passport && req.session.passport.user) {
+
+      const userID = req.session.passport.user;
+      const user = await User.findById(userID).lean().exec();
+      if (user === null) {
+        return res.status(404).json({ status: 'error', error: 'User not found' });
+      }
+
+      const cartID = user.cart;
+      const result = await cartModel.findById(cartID).lean().exec();
+      if (result === null) {
+        return res.status(404).json({ status: 'error', error: 'Cart not found' });
+      }
+
+      res.render('carts', { cid: result._id, products: result.products });
     }
-    const mailUser = req.session.user.email;
-    res.render('carts', { cid: result._id, products: result.products, mailUser: mailUser});
   } catch (error) {
     res.status(500).json({ status: 'error', error: error.message });
   }
 }
-
 export const readViewsChats = async (req, res) => {
   res.render("chat")
 }
