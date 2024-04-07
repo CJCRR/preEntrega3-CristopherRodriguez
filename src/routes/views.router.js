@@ -21,7 +21,7 @@ router.get('/realtimeproducts', isAuthenticated, isAdmin, readViewsRealTimeProdu
 router.get('/realtimeproducts/:cid', isAuthenticated, readViewsProductController);
 
 // Devuelve un carrito según su id
-router.get('/carts', isAuthenticated, readViewsCartController);
+router.get('/carts/:cid', isAuthenticated, readViewsCartController);
 
 // Devuelve el chat de usuario
 router.get('/chat', readViewsChats);

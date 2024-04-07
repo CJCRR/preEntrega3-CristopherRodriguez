@@ -6,17 +6,17 @@
     <ul>
         <h4>Productos agregados al carrito</h4>
         </br>
-        {{title}}
+        
         {{#each products}}
         <li>
-            {{this.title}} - {{this.quantity}}
+            {{this.product}} - {{this.product.title}} - {{this.quantity}} - {{this.product.price}}
         </li>
         {{/each}}
     </ul>
 </div>
 
 {{#if products.length}}
-    <button id="purchaseBtn" data-cart-id="{{cid}}" data-mail-user="{{mailUser}}">Finalizar Compra</button> <!-- Agregar atributo de datos -->
+    <button id="purchaseBtn"  class="btn btn-outline-primary col" data-cart-id="{{cid}}" data-mail-user="{{mailUser}}">Finalizar Compra</button> <!-- Agregar atributo de datos -->
 {{/if}}
 
 <div id="purchaseResults" class="ticket" style="display: none;">
